@@ -12,6 +12,9 @@
   <div class="loading-indicator" id="loadingIndicator">Cargando...</div>
 
 <script>
+  // Disable music globally
+  const MUSIC_ENABLED = false;
+
   // Configuración de música
   const musicConfig = {
     songs: [
@@ -39,24 +42,30 @@
   ];
 
   // Load assets file
-	function cargarAssets() {
-		return new Promise((resolve) => {
-			const script = document.createElement('script');
-			script.src = 'sog-index.js';
-			script.onload = () => {
-				console.log('Sogs loaded:', assets.length);
-				resolve();
-			};
-			script.onerror = () => {
-				console.error('Error loading assets.js :c');
-				assets = ["https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Bsodwindows10.png/1200px-Bsodwindows10.png"];
-				resolve();
-			};
-			document.head.appendChild(script);
-		});
-	}
+    function cargarAssets() {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'sog-index.js';
+            script.onload = () => {
+                console.log('Sogs loaded:', assets.length);
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('Error loading assets.js :c');
+                assets = ["https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Bsodwindows10.png/1200px-Bsodwindows10.png"];
+                resolve();
+            };
+            document.head.appendChild(script);
+        });
+    }
 
   function reproducirMusicaAleatoria() {
+    // Music disabled -> do nothing
+    if (!MUSIC_ENABLED) {
+      musicConfig.isPlaying = false;
+      return;
+    }
+
     if (music) {
       music.pause();
       music = null;
@@ -95,6 +104,12 @@
   }
 
   function reproducirSpeedup() {
+    // Music disabled -> do nothing
+    if (!MUSIC_ENABLED) {
+      musicConfig.isSpeedupActive = false;
+      return;
+    }
+
     if (music) {
       music.pause();
       music = null;
@@ -126,6 +141,12 @@
 
   // Cargar meow desde archivo MP3
   function crearMeowSound() {
+    // Music/sound disabled -> don't create or play meow
+    if (!MUSIC_ENABLED) {
+      meowSound = null;
+      return;
+    }
+
     meowSound = new Audio("./song/meow.mp3");
     meowSound.volume = 0.2;
     
@@ -219,7 +240,7 @@
     const boostAmount = 10;
     const tempBolas = [];
 
-    // Reproducir speedup al iniciar el boost
+    // Reproducir speedup al iniciar el boost (will no-op if MUSIC_ENABLED is false)
     reproducirSpeedup();
 
     for (let i = 0; i < boostAmount && assets.length > 0; i++) {
@@ -287,7 +308,7 @@
       crearBola(src);
     }
 
-    // Random music moment
+    // Random music moment (no-op if MUSIC_ENABLED is false)
     setTimeout(() => {
       reproducirMusicaAleatoria();
     }, 1000);
